@@ -65,10 +65,14 @@ public class UserController {
 
         try {
             User user = (User) userService.loadUserByUsername(username);
+            //((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getAuthorities();
+            System.out.println(user);
             if (userService.checkPassword(user, password)) {
+                //result.put("data", user);
                 result.put("status", 1);
                 result.put("message", "Login success.");
                 result.put("token", tokenUtil.generateToken(user));
+                //result.put("auth",((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getAuthorities());
             } else {
                 result.put("status", 0);
                 result.put("message", "Wrong password.");
@@ -105,6 +109,59 @@ public class UserController {
 
         return response;
     }
+
+    @ResponseBody
+    @GetMapping("/profile")
+    public JSONObject getProfile() {
+        JSONObject response = new JSONObject();
+
+        response.put("status", 1);
+        response.put("message", "Get profile success.");
+        response.put("data", SecurityUtil.getUser());
+
+        return response;
+    }
+
+    @ResponseBody
+    @GetMapping("/profile/{id}")
+    public JSONObject getProfileById(@PathVariable("id") Long id) {
+        JSONObject response = new JSONObject();
+
+        User user = userService.loadById(id);
+
+        response.put("status", 1);
+        response.put("message", "Get profile success.");
+        response.put("data", user);
+
+        return response;
+    }
+
+    @ResponseBody
+    @PostMapping("/profile")
+    @Transactional
+    public JSONObject editProfile(@RequestBody JSONObject request) {
+        JSONObject response = new JSONObject();
+
+        User user = userService.loadById(SecurityUtil.getUserId());
+
+        Optional<String> name = Optional.of(request.getString("name"));
+
+        //user.setName()
+        name.ifPresent(user::setName);
+
+        try {
+            response.put("data", userService.update(user));
+            response.put("status", 1);
+            response.put("message", "Update profile success.");
+        } catch (Exception e) {
+            response.put("status", 0);
+            response.put("message", "Update profile failed.");
+        }
+
+        return response;
+    }
+
+
 
     @GetMapping("/hello")
     public JSONObject hello(){

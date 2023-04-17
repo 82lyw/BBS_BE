@@ -1,6 +1,5 @@
 package com.example.bbs.user;
 
-import com.example.bbs.user.model.Role;
 import com.example.bbs.user.model.User;
 import com.example.bbs.user.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +25,7 @@ public class UserService implements UserDetailsService {
     public User add(User user) {
         String hash = passwordEncoder.encode(user.getPassword());
         user.setPassword(hash);
-        user.setRole(Role.USER);
+        //user.setRole(Role.USER);
         return userRepository.save(user);
     }
 
